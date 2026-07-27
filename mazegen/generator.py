@@ -1,12 +1,14 @@
+from __future__ import annotations
 from .cell import Cell
 import random
+
 
 # Códigos de cor ANSI (para usar no terminal).
 # Formato: "\033[XXm" liga a cor, "\033[0m" repõe a cor normal.
 # 31 = vermelho   32 = verde     33 = amarelo   34 = azul
 # 35 = magenta    36 = cyan      37 = branco
 COLOR_RESET = "\033[0m"
-COLORS = {
+COLORS: dict[str, str] = {
     "1": "31",  # vermelho
     "2": "32",  # verde
     "3": "34",  # azul
@@ -17,23 +19,50 @@ COLORS = {
 
 
 class MazeGenerator:
-    """Represents the rows of cells present on the maze"""
+    """Generates and manages a maze grid.
+
+    Provides maze generation via the recursive backtracker algorithm,
+    wall management, pathfinding (BFS), loop injection, the "42" pattern,
+    and output in hex / ASCII-art formats.
+
+    Attributes:
+        seed: Random seed used for reproducible generation.
+        width: Number of columns in the grid.
+        height: Number of rows in the grid.
+        grid: 2D list of Cell objects.
+        pattern_42: List of (col, row) tuples forming the "42" pattern.
+    """
 
     def __init__(self, width: int, height: int, seed: int) -> None:
+        """Create a new grid of cells and set the random seed.
+
+        Args:
+            width: Number of columns.
+            height: Number of rows.
+            seed: Integer seed for reproducible randomness.
+        """
         random.seed(seed)
         self.seed: int = seed
         self.width: int = width
         self.height: int = height
-        self.grid: list = []
+        self.grid: list[list[Cell]] = []
         for y in range(height):
-            row = []
+            row: list[Cell] = []
             for x in range(width):
                 row.append(Cell(x, y))
             self.grid.append(row)
-        self.pattern_42: list = []
+        self.pattern_42: list[tuple[int, int]] = []
 
-    def get_neighbors(self, cell) -> list:
-        neighbors = []
+    def get_neighbors(self, cell: Cell) -> list[Cell]:
+        """Return all orthogonally adjacent cells (up to 4).
+
+        Args:
+            cell: The cell whose neighbours to look up.
+
+        Returns:
+            List of adjacent Cell objects within grid bounds.
+        """
+        neighbors: list[Cell] = []
         if cell.y - 1 >= 0:
             neighbor = self.grid[cell.y - 1][cell.x]
             neighbors.append(neighbor)
@@ -48,23 +77,56 @@ class MazeGenerator:
             neighbors.append(neighbor)
         return neighbors
 
-    def remove_wall_east(self, current, neighbor) -> None:
+    def remove_wall_east(self, current: Cell, neighbor: Cell) -> None:
+        """Remove the east wall of current and the west wall of neighbour.
+
+        Args:
+            current: The cell whose east wall is removed.
+            neighbor: The cell whose west wall is removed.
+        """
         current.wall_east = False
         neighbor.wall_west = False
 
-    def remove_wall_north(self, current, neighbor) -> None:
+    def remove_wall_north(self, current: Cell, neighbor: Cell) -> None:
+        """Remove the north wall of current and the south wall of neighbour.
+
+        Args:
+            current: The cell whose north wall is removed.
+            neighbor: The cell whose south wall is removed.
+        """
         current.wall_north = False
         neighbor.wall_south = False
 
-    def remove_wall_south(self, current, neighbor) -> None:
+    def remove_wall_south(self, current: Cell, neighbor: Cell) -> None:
+        """Remove the south wall of current and the north wall of neighbour.
+
+        Args:
+            current: The cell whose south wall is removed.
+            neighbor: The cell whose north wall is removed.
+        """
         current.wall_south = False
         neighbor.wall_north = False
 
-    def remove_wall_west(self, current, neighbor) -> None:
+    def remove_wall_west(self, current: Cell, neighbor: Cell) -> None:
+        """Remove the west wall of current and the east wall of neighbour.
+
+        Args:
+            current: The cell whose west wall is removed.
+            neighbor: The cell whose east wall is removed.
+        """
         current.wall_west = False
         neighbor.wall_east = False
 
-    def remove_wall_between(self, current, neighbor) -> None:
+    def remove_wall_between(self, current: Cell, neighbor: Cell) -> None:
+        """Remove the wall shared by two adjacent cells.
+
+        Automatically detects the relative position and delegates to the
+        correct directional removal method.
+
+        Args:
+            current: One of the two adjacent cells.
+            neighbor: The other adjacent cell.
+        """
         if neighbor.y < current.y:
             self.remove_wall_north(current, neighbor)
         if neighbor.y > current.y:
@@ -74,23 +136,56 @@ class MazeGenerator:
         if neighbor.x > current.x:
             self.remove_wall_east(current, neighbor)
 
-    def add_wall_east(self, current, neighbor) -> None:
+    def add_wall_east(self, current: Cell, neighbor: Cell) -> None:
+        """Add the east wall of current and the west wall of neighbour.
+
+        Args:
+            current: The cell whose east wall is added.
+            neighbor: The cell whose west wall is added.
+        """
         current.wall_east = True
         neighbor.wall_west = True
 
-    def add_wall_north(self, current, neighbor) -> None:
+    def add_wall_north(self, current: Cell, neighbor: Cell) -> None:
+        """Add the north wall of current and the south wall of neighbour.
+
+        Args:
+            current: The cell whose north wall is added.
+            neighbor: The cell whose south wall is added.
+        """
         current.wall_north = True
         neighbor.wall_south = True
 
-    def add_wall_south(self, current, neighbor) -> None:
+    def add_wall_south(self, current: Cell, neighbor: Cell) -> None:
+        """Add the south wall of current and the north wall of neighbour.
+
+        Args:
+            current: The cell whose south wall is added.
+            neighbor: The cell whose north wall is added.
+        """
         current.wall_south = True
         neighbor.wall_north = True
 
-    def add_wall_west(self, current, neighbor) -> None:
+    def add_wall_west(self, current: Cell, neighbor: Cell) -> None:
+        """Add the west wall of current and the east wall of neighbour.
+
+        Args:
+            current: The cell whose west wall is added.
+            neighbor: The cell whose east wall is added.
+        """
         current.wall_west = True
         neighbor.wall_east = True
 
-    def add_wall_between(self, current, neighbor) -> None:
+    def add_wall_between(self, current: Cell, neighbor: Cell) -> None:
+        """Add the wall shared by two adjacent cells.
+
+        Automatically detects the relative position and delegates to the
+        correct directional addition method.
+
+        Args:
+            current: One of the two adjacent cells.
+            neighbor: The other adjacent cell.
+        """
         if neighbor.y < current.y:
             self.add_wall_north(current, neighbor)
         if neighbor.y > current.y:
@@ -100,34 +195,60 @@ class MazeGenerator:
         if neighbor.x > current.x:
             self.add_wall_east(current, neighbor)
 
-    def get_unvisited_neighbors(self, cell) -> list:
+    def get_unvisited_neighbors(self, cell: Cell) -> list[Cell]:
+        """Return neighbours that have not been visited during generation.
+
+        Args:
+            cell: The cell whose unvisited neighbours to retrieve.
+
+        Returns:
+            List of unvisited adjacent Cell objects.
+        """
         neighbors = self.get_neighbors(cell)
-        unvisited = []
+        unvisited: list[Cell] = []
         for neighbor in neighbors:
             if not neighbor.visited:
                 unvisited.append(neighbor)
         return unvisited
 
-    def get_accessible_neighbors(self, cell) -> list:
+    def get_accessible_neighbors(self, cell: Cell) -> list[Cell]:
+        """Return neighbours reachable through an open wall.
+
+        Args:
+            cell: The cell whose accessible neighbours to retrieve.
+
+        Returns:
+            List of Cell objects reachable without crossing a wall.
+        """
         neighbors = self.get_neighbors(cell)
-        accessible = []
+        accessible: list[Cell] = []
         for neighbor in neighbors:
+            is_open = False
             if neighbor.y < cell.y:
                 is_open = not cell.wall_north
-            if neighbor.y > cell.y:
+            elif neighbor.y > cell.y:
                 is_open = not cell.wall_south
-            if neighbor.x < cell.x:
+            elif neighbor.x < cell.x:
                 is_open = not cell.wall_west
-            if neighbor.x > cell.x:
+            elif neighbor.x > cell.x:
                 is_open = not cell.wall_east
             if is_open:
                 accessible.append(neighbor)
         return accessible
 
-    def generate(self, start_x, start_y) -> None:
+    def generate(self, start_x: int, start_y: int) -> None:
+        """Generate a perfect maze using the recursive backtracker.
+
+        Starts at (start_x, start_y) and carves passages by randomly
+        visiting unvisited neighbours until every cell is reachable.
+
+        Args:
+            start_x: Column index of the starting cell.
+            start_y: Row index of the starting cell.
+        """
         start = self.grid[start_y][start_x]
         start.visited = True
-        stack = [start]
+        stack: list[Cell] = [start]
         while len(stack) > 0:
             current = stack[-1]
             unvisited = self.get_unvisited_neighbors(current)
@@ -139,7 +260,19 @@ class MazeGenerator:
             else:
                 stack.pop()
 
-    def is_block_open(self, x, y) -> bool:
+    def is_block_open(self, x: int, y: int) -> bool:
+        """Check whether a 2x2 block starting at (x, y) is fully open.
+
+        A block is open when all four cells share no walls between them,
+        which is forbidden by the maze rules.
+
+        Args:
+            x: Column index of the top-left cell.
+            y: Row index of the top-left cell.
+
+        Returns:
+            True if the 2x2 block has no internal walls, False otherwise.
+        """
         if x + 1 >= self.width or y + 1 >= self.height:
             return False
         a = self.grid[y][x]
@@ -149,25 +282,39 @@ class MazeGenerator:
                 and not a.wall_south and not b.wall_south)
 
     def has_any_open_block(self) -> bool:
+        """Check whether any 2x2 open block exists in the grid.
+
+        Returns:
+            True if at least one 2x2 open block is found, False otherwise.
+        """
         for y in range(self.height - 1):
             for x in range(self.width - 1):
                 if self.is_block_open(x, y):
                     return True
         return False
 
-    def add_loops(self, attempts) -> None:
+    def add_loops(self, attempts: int) -> None:
+        """Add extra passages to create loops in the maze.
+
+        Each attempt picks a random cell and neighbour, removes the wall
+        between them, and re-adds it if doing so creates a 2x2 open block.
+
+        Args:
+            attempts: Number of random wall-removal attempts to try.
+        """
         for i in range(attempts):
             row = random.choice(self.grid)
             cell = random.choice(row)
             neighbors = self.get_neighbors(cell)
             neighbor = random.choice(neighbors)
+            is_open = False
             if neighbor.y < cell.y:
                 is_open = not cell.wall_north
-            if neighbor.y > cell.y:
+            elif neighbor.y > cell.y:
                 is_open = not cell.wall_south
-            if neighbor.x < cell.x:
+            elif neighbor.x < cell.x:
                 is_open = not cell.wall_west
-            if neighbor.x > cell.x:
+            elif neighbor.x > cell.x:
                 is_open = not cell.wall_east
             if is_open:
                 continue
@@ -175,9 +322,20 @@ class MazeGenerator:
             if self.has_any_open_block():
                 self.add_wall_between(cell, neighbor)
 
-    def is_connected(self, start, end) -> bool:
-        fila = [start]
-        visitados = {start}
+    def is_connected(self, start: Cell, end: Cell) -> bool:
+        """Check whether two cells are reachable from each other.
+
+        Uses BFS to traverse accessible neighbours.
+
+        Args:
+            start: The origin cell.
+            end: The destination cell.
+
+        Returns:
+            True if a path exists between start and end, False otherwise.
+        """
+        fila: list[Cell] = [start]
+        visitados: set[Cell] = {start}
         while len(fila) > 0:
             atual = fila.pop(0)
             if atual == end:
@@ -189,9 +347,18 @@ class MazeGenerator:
                     fila.append(vizinho)
         return False
 
-    def bfs(self, start, end) -> list:
-        fila = [start]
-        came_from = {start: None}
+    def bfs(self, start: Cell, end: Cell) -> list[Cell]:
+        """Find the shortest path between two cells using BFS.
+
+        Args:
+            start: The origin cell.
+            end: The destination cell.
+
+        Returns:
+            Ordered list of Cell objects from start to end (inclusive).
+        """
+        fila: list[Cell] = [start]
+        came_from: dict[Cell, Cell | None] = {start: None}
         while len(fila) > 0:
             atual = fila.pop(0)
             if atual == end:
@@ -201,15 +368,23 @@ class MazeGenerator:
                 if vizinho not in came_from:
                     came_from[vizinho] = atual
                     fila.append(vizinho)
-        caminho = []
-        atual = end
-        while atual is not None:
-            caminho.append(atual)
-            atual = came_from[atual]
+        caminho: list[Cell] = []
+        current: Cell | None = end
+        while current is not None:
+            caminho.append(current)
+            current = came_from[current]
         caminho.reverse()
         return caminho
 
-    def path_to_directions(self, caminho) -> str:
+    def path_to_directions(self, caminho: list[Cell]) -> str:
+        """Convert a cell path into a direction string.
+
+        Args:
+            caminho: Ordered list of Cell objects forming a path.
+
+        Returns:
+            A string of N/E/S/W characters representing the moves.
+        """
         direcoes = ""
         for i in range(len(caminho) - 1):
             atual = caminho[i]
@@ -224,7 +399,17 @@ class MazeGenerator:
                 direcoes += "E"
         return direcoes
 
-    def hexa(self, cell) -> str:
+    def hexa(self, cell: Cell) -> str:
+        """Encode a cell's walls as a single hexadecimal character.
+
+        Bit layout: 0=N, 1=E, 2=S, 3=W. A set wall sets the bit to 1.
+
+        Args:
+            cell: The cell to encode.
+
+        Returns:
+            Uppercase hex character ('0'-'F') representing the walls.
+        """
         valor = 0
         if cell.wall_north:
             valor += 1
@@ -236,7 +421,9 @@ class MazeGenerator:
             valor += 8
         return f"{valor:X}"
 
-    def print_maze(self, entry, exit, caminho, cor="37", cor_42="35") -> None:
+    def print_maze(self, entry: tuple[int, int], exit: tuple[int, int],
+                   caminho: list[Cell], cor: str = "37",
+                   cor_42: str = "35") -> None:
         """Desenha o labirinto no terminal.
 
         Args:
@@ -275,7 +462,7 @@ class MazeGenerator:
                 elif (cell.x, cell.y) == exit:
                     mid_line += f"\033[31mEX{COLOR_RESET}"
                 elif cell in caminho:
-                    mid_line += f"\033[33m★ {COLOR_RESET}"
+                    mid_line += f"\033[33m* {COLOR_RESET}"
                 else:
                     mid_line += "  "
             print(mid_line + f"\033[{cor}m|{COLOR_RESET}")
@@ -293,8 +480,19 @@ class MazeGenerator:
             under_line += COLOR_RESET
         print(under_line + f"\033[{cor}m+{COLOR_RESET}")
 
-    def apply_42_pattern(self, entry, exit) -> None:
-        pattern = [
+    def apply_42_pattern(self, entry: tuple[int, int],
+                         exit: tuple[int, int]) -> None:
+        """Carve the visually closed "42" pattern into the maze.
+
+        Fully closes a set of cells in the shape of "42" at the top-left
+        corner. If this would block the entry, exit, or disconnect the
+        maze, the pattern is reverted.
+
+        Args:
+            entry: (x, y) coordinates of the maze entry.
+            exit: (x, y) coordinates of the maze exit.
+        """
+        pattern: list[tuple[int, int]] = [
             (0, 0), (0, 1), (0, 2),
             (1, 2), (2, 2), (3, 2), (4, 2),
             (4, 0), (4, 1), (4, 2), (4, 3), (4, 4),
@@ -319,7 +517,7 @@ class MazeGenerator:
         exit_x, exit_y = exit
         exit_cell = self.grid[exit_y][exit_x]
 
-        affected = set()
+        affected: set[tuple[int, int]] = set()
         for col, row in pattern:
             affected.add((col, row))
             if col + 1 < self.width:
@@ -327,7 +525,7 @@ class MazeGenerator:
             if row + 1 < self.height:
                 affected.add((col, row + 1))
 
-        snapshot = {}
+        snapshot: dict[tuple[int, int], tuple[bool, bool, bool, bool]] = {}
         for (c, r) in affected:
             cell = self.grid[r][c]
             snapshot[(c, r)] = (
@@ -361,7 +559,22 @@ class MazeGenerator:
 
         self.pattern_42 = pattern
 
-    def write_output(self, path, entry, exit) -> None:
+    def write_output(self, path: str, entry: tuple[int, int],
+                     exit: tuple[int, int]) -> None:
+        """Write the maze to a file in hex encoding format.
+
+        The file contains one hex digit per cell (row by row), followed
+        by an empty line, the entry coordinates, the exit coordinates,
+        and the shortest path as N/E/S/W directions.
+
+        Args:
+            path: Filesystem path for the output file.
+            entry: (x, y) coordinates of the maze entry.
+            exit: (x, y) coordinates of the maze exit.
+
+        Raises:
+            ValueError: If entry and exit are not connected.
+        """
         with open(path, "w") as f:
             for row in self.grid:
                 line = ""
@@ -385,7 +598,6 @@ class MazeGenerator:
             directions = self.path_to_directions(caminho)
             f.write(directions + "\n")
 
-# Example usage (manual smoke test):
 # if __name__ == "__main__":
 #     m = MazeGenerator(20, 20, seed=42)
 #     entry = (0, 19)

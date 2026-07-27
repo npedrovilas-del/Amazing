@@ -1,17 +1,36 @@
+from __future__ import annotations
 import sys
+from typing import Any
 
 
 class ConfigError(Exception):
-    pass
+    """Raised when the configuration file is invalid or missing."""
 
 
-def load_config(path):
-    required_keys = {
+def load_config(path: str) -> dict[str, Any]:
+    """Load and validate a maze configuration file.
+
+    Parses a plain-text file with KEY=VALUE pairs, validates all required
+    keys, converts types, and returns a fully resolved config dictionary.
+
+    Args:
+        path: Filesystem path to the configuration file.
+
+    Returns:
+        A dictionary with validated config values (WIDTH, HEIGHT, ENTRY,
+        EXIT, OUTPUT_FILE, PERFECT, and optionally SEED).
+
+    Raises:
+        ConfigError: If the file is missing, has invalid syntax, or any
+            value violates the constraints (out of bounds, missing keys,
+            etc.).
+    """
+    required_keys: set[str] = {
         "WIDTH", "HEIGHT", "ENTRY", "EXIT", "OUTPUT_FILE", "PERFECT"
     }
     try:
         with open(path, "r") as f:
-            config_dict = {}
+            config_dict: dict[str, Any] = {}
             for line in f:
                 line = line.strip()
                 if line == "":
@@ -56,7 +75,7 @@ def load_config(path):
         raise ConfigError("Exit should be inside the maze x and y")
     if (config_dict["PERFECT"] != "True" and
             config_dict["PERFECT"] != "False"):
-        raise ConfigError("Perfect should be formated as: ´True´/´False´")
+        raise ConfigError('Perfect should be formated as: "True"/"False"')
     if config_dict["PERFECT"] == "True":
         config_dict["PERFECT"] = True
     else:
