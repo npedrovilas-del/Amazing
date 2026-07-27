@@ -1,7 +1,7 @@
 from mazegen import MazeGenerator
 
 
-def test_same_seed_gives_same_maze():
+def test_same_seed_gives_same_maze() -> None:
     m1 = MazeGenerator(10, 10, seed=42)
     m1.generate(0, 0)
     m2 = MazeGenerator(10, 10, seed=42)
@@ -12,13 +12,13 @@ def test_same_seed_gives_same_maze():
             assert c1.wall_east == c2.wall_east
 
 
-def test_perfect_maze_has_no_open_block():
+def test_perfect_maze_has_no_open_block() -> None:
     m = MazeGenerator(10, 10, seed=1)
     m.generate(0, 0)
     assert m.has_any_open_block() is False
 
 
-def test_perfect_maze_all_cells_visited():
+def test_perfect_maze_all_cells_visited() -> None:
     m = MazeGenerator(5, 5, seed=1)
     m.generate(0, 0)
     for row in m.grid:
@@ -26,7 +26,7 @@ def test_perfect_maze_all_cells_visited():
             assert cell.visited is True
 
 
-def test_bfs_finds_path_between_corners():
+def test_bfs_finds_path_between_corners() -> None:
     m = MazeGenerator(10, 10, seed=7)
     m.generate(0, 0)
     start = m.grid[0][0]
@@ -36,7 +36,7 @@ def test_bfs_finds_path_between_corners():
     assert path[-1] == end
 
 
-def test_add_loops_never_creates_open_block():
+def test_add_loops_never_creates_open_block() -> None:
     m = MazeGenerator(10, 10, seed=3)
     m.generate(0, 0)
     m.add_loops(200)

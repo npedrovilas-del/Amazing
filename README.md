@@ -214,3 +214,13 @@ on how to proceed.
 ### Tools used
 
 Python 3, `flake8`, `mypy`, `build`/`setuptools`, Git.
+
+## For the 42 patter:
+WIDTH=20
+HEIGHT=10
+ENTRY=15,5
+EXIT=19,9
+OUTPUT_FILE=maze.txt
+PERFECT=True
+SEED=42
+

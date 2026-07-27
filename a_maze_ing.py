@@ -12,19 +12,25 @@ if __name__ == "__main__":
         print(f"{e}")
         sys.exit(1)
     print(config)
-    m2 = MazeGenerator(config["WIDTH"], config["HEIGHT"], seed=config["SEED"])
-    entry_x, entry_y = config["ENTRY"]
-    m2.generate(entry_x, entry_y)
-    if not config["PERFECT"]:
-        m2.add_loops(100)
-    m2.apply_42_pattern(config["ENTRY"], config["EXIT"])
-    m2.write_output(config["OUTPUT_FILE"], config["ENTRY"], config["EXIT"])
-    entry_x, entry_y = config["ENTRY"]
-    exit_x, exit_y = config["EXIT"]
-    entry_cell = m2.grid[entry_y][entry_x]
-    exit_cell = m2.grid[exit_y][exit_x]
-    caminho = m2.bfs(entry_cell, exit_cell)
-    m2.print_maze(config["ENTRY"], config["EXIT"], caminho)
+    try:
+        m2 = MazeGenerator(config["WIDTH"], config["HEIGHT"],
+                           seed=config["SEED"])
+        entry_x, entry_y = config["ENTRY"]
+        m2.generate(entry_x, entry_y)
+        if not config["PERFECT"]:
+            m2.add_loops(100)
+        m2.apply_42_pattern(config["ENTRY"], config["EXIT"])
+        m2.write_output(config["OUTPUT_FILE"], config["ENTRY"],
+                        config["EXIT"])
+        entry_x, entry_y = config["ENTRY"]
+        exit_x, exit_y = config["EXIT"]
+        entry_cell = m2.grid[entry_y][entry_x]
+        exit_cell = m2.grid[exit_y][exit_x]
+        caminho = m2.bfs(entry_cell, exit_cell)
+        m2.print_maze(config["ENTRY"], config["EXIT"], caminho)
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)
     mostrar_caminho = True
     while True:
         print("=== A-Maze-ing ===")
@@ -34,21 +40,24 @@ if __name__ == "__main__":
         print("4. Quit")
         escolha = input("Choice? (1-4): ")
         if escolha == "1":
-            m2 = MazeGenerator(config["WIDTH"], config["HEIGHT"],
-                               seed=config["SEED"])
-            entry_x, entry_y = config["ENTRY"]
-            m2.generate(entry_x, entry_y)
-            if not config["PERFECT"]:
-                m2.add_loops(100)
-            m2.apply_42_pattern(config["ENTRY"], config["EXIT"])
-            m2.write_output(config["OUTPUT_FILE"], config["ENTRY"],
-                            config["EXIT"])
-            entry_x, entry_y = config["ENTRY"]
-            exit_x, exit_y = config["EXIT"]
-            entry_cell = m2.grid[entry_y][entry_x]
-            exit_cell = m2.grid[exit_y][exit_x]
-            caminho = m2.bfs(entry_cell, exit_cell)
-            m2.print_maze(config["ENTRY"], config["EXIT"], caminho)
+            try:
+                m2 = MazeGenerator(config["WIDTH"], config["HEIGHT"],
+                                   seed=config["SEED"])
+                entry_x, entry_y = config["ENTRY"]
+                m2.generate(entry_x, entry_y)
+                if not config["PERFECT"]:
+                    m2.add_loops(100)
+                m2.apply_42_pattern(config["ENTRY"], config["EXIT"])
+                m2.write_output(config["OUTPUT_FILE"], config["ENTRY"],
+                                config["EXIT"])
+                entry_x, entry_y = config["ENTRY"]
+                exit_x, exit_y = config["EXIT"]
+                entry_cell = m2.grid[entry_y][entry_x]
+                exit_cell = m2.grid[exit_y][exit_x]
+                caminho = m2.bfs(entry_cell, exit_cell)
+                m2.print_maze(config["ENTRY"], config["EXIT"], caminho)
+            except Exception as e:
+                print(f"Error: {e}")
         elif escolha == "2":
             mostrar_caminho = not mostrar_caminho
             if mostrar_caminho:
