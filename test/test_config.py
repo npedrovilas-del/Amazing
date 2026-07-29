@@ -72,3 +72,17 @@ PERFECT=True
 """)
     with pytest.raises(ConfigError, match="border"):
         load_config(path)
+
+
+def test_seed_not_int_raises(tmp_path: object) -> None:
+    path = write_config(tmp_path, """
+WIDTH=10
+HEIGHT=10
+ENTRY=0,0
+EXIT=9,9
+OUTPUT_FILE=maze.txt
+PERFECT=True
+SEED=abc
+""")
+    with pytest.raises(ConfigError):
+        load_config(path)
