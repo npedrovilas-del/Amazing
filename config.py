@@ -61,18 +61,15 @@ def load_config(path: str) -> dict[str, Any]:
         raise ConfigError("Width should be bigger than 0")
     if config_dict["HEIGHT"] <= 0:
         raise ConfigError("Height should be bigger than 0")
-    if (config_dict["ENTRY"][0] < 0 or
-            config_dict["ENTRY"][0] >= config_dict["WIDTH"]):
-        raise ConfigError("Entry should be inside the maze x and y")
-    if (config_dict["ENTRY"][1] < 0 or
-            config_dict["ENTRY"][1] >= config_dict["HEIGHT"]):
-        raise ConfigError("Entry should be inside the maze x and y")
-    if (config_dict["EXIT"][0] < 0 or
-            config_dict["EXIT"][0] >= config_dict["WIDTH"]):
-        raise ConfigError("Exit should be inside the maze x and y")
-    if (config_dict["EXIT"][1] < 0 or
-            config_dict["EXIT"][1] >= config_dict["HEIGHT"]):
-        raise ConfigError("Exit should be inside the maze x and y")
+    for name, (ex, ey) in [("Entry", config_dict["ENTRY"]),
+                           ("Exit", config_dict["EXIT"])]:
+        if ex < 0 or ex >= config_dict["WIDTH"]:
+            raise ConfigError(f"{name} should be inside the maze x and y")
+        if ey < 0 or ey >= config_dict["HEIGHT"]:
+            raise ConfigError(f"{name} should be inside the maze x and y")
+        if (ex != 0 and ex != config_dict["WIDTH"] - 1
+                and ey != 0 and ey != config_dict["HEIGHT"] - 1):
+            raise ConfigError(f"{name} must be on the maze border")
     if (config_dict["PERFECT"] != "True" and
             config_dict["PERFECT"] != "False"):
         raise ConfigError('Perfect should be formated as: "True"/"False"')

@@ -67,7 +67,7 @@ per line. Lines starting with `#` are treated as comments and ignored.
 | `EXIT` | Exit coordinates `x,y` | `EXIT=19,14` |
 | `OUTPUT_FILE` | Name of the output file | `OUTPUT_FILE=maze.txt` |
 | `PERFECT` | `True` for a perfect maze (single path), `False` to add extra loops | `PERFECT=True` |
-| `SEED` (optional) | Integer seed for reproducible generation. Defaults to `0` if omitted | `SEED=42` |
+| `SEED` (optional) | Integer seed for reproducible generation. Defaults to `42` if omitted | `SEED=42` |
 
 Example:
 

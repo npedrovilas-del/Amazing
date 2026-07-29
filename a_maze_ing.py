@@ -16,10 +16,10 @@ if __name__ == "__main__":
         m2 = MazeGenerator(config["WIDTH"], config["HEIGHT"],
                            seed=config["SEED"])
         entry_x, entry_y = config["ENTRY"]
+        m2.apply_42_pattern(config["ENTRY"], config["EXIT"])
         m2.generate(entry_x, entry_y)
         if not config["PERFECT"]:
             m2.add_loops(100)
-        m2.apply_42_pattern(config["ENTRY"], config["EXIT"])
         m2.write_output(config["OUTPUT_FILE"], config["ENTRY"],
                         config["EXIT"])
         entry_x, entry_y = config["ENTRY"]
@@ -44,10 +44,10 @@ if __name__ == "__main__":
                 m2 = MazeGenerator(config["WIDTH"], config["HEIGHT"],
                                    seed=config["SEED"])
                 entry_x, entry_y = config["ENTRY"]
+                m2.apply_42_pattern(config["ENTRY"], config["EXIT"])
                 m2.generate(entry_x, entry_y)
                 if not config["PERFECT"]:
                     m2.add_loops(100)
-                m2.apply_42_pattern(config["ENTRY"], config["EXIT"])
                 m2.write_output(config["OUTPUT_FILE"], config["ENTRY"],
                                 config["EXIT"])
                 entry_x, entry_y = config["ENTRY"]
