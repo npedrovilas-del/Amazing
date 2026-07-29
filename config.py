@@ -53,8 +53,12 @@ def load_config(path: str) -> dict[str, Any]:
         c, d = config_dict["EXIT"].split(",")
         config_dict["EXIT"] = (int(c), int(d))
         config_dict["OUTPUT_FILE"] = str(config_dict["OUTPUT_FILE"])
+        if "SEED" in config_dict:
+            config_dict["SEED"] = int(config_dict["SEED"])
     except (IndexError, ValueError) as e:
         raise ConfigError(f"Error: {e}")
+    if "SEED" not in config_dict:
+        config_dict["SEED"] = 42
     if config_dict["ENTRY"] == config_dict["EXIT"]:
         raise ConfigError("Entry and exit should be in diferent places")
     if config_dict["WIDTH"] <= 0:
