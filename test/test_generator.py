@@ -41,3 +41,36 @@ def test_add_loops_never_creates_open_block() -> None:
     m.generate(0, 0)
     m.add_loops(200)
     assert m.has_any_open_block() is False
+
+
+def test_apply_42_centered_on_large_maze() -> None:
+    m = MazeGenerator(30, 20, seed=42)
+    m.apply_42_pattern((1, 1), (28, 18))
+    m.generate(1, 1)
+    assert len(m.pattern_42) > 0
+    min_x = min(c[0] for c in m.pattern_42)
+    max_x = max(c[0] for c in m.pattern_42)
+    min_y = min(c[1] for c in m.pattern_42)
+    max_y = max(c[1] for c in m.pattern_42)
+    assert min_x > 0
+    assert min_y > 0
+    assert max_x < m.width - 1
+    assert max_y < m.height - 1
+
+
+def test_apply_42_skipped_when_entry_in_pattern() -> None:
+    m = MazeGenerator(10, 10, seed=42)
+    m.apply_42_pattern((0, 2), (9, 9))
+    assert len(m.pattern_42) == 0
+
+
+def test_apply_42_never_blocks_path() -> None:
+    for seed in range(10):
+        m = MazeGenerator(30, 20, seed=seed)
+        m.apply_42_pattern((1, 1), (28, 18))
+        m.generate(1, 1)
+        start = m.grid[1][1]
+        end = m.grid[18][28]
+        path = m.bfs(start, end)
+        assert path[0] == start
+        assert path[-1] == end

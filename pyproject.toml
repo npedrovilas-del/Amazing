@@ -9,8 +9,8 @@ description = "Maze generation library for the A-Maze-ing 42 project"
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
-    {name = "pneto-vi"}
-    {name = "nfardim"}
+    {name = "pneto-vi"},
+    {name = "nfardim"},
 ]
 
 [tool.setuptools.packages.find]

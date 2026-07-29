@@ -3,18 +3,14 @@ from .cell import Cell
 import random
 
 
-# Códigos de cor ANSI (para usar no terminal).
-# Formato: "\033[XXm" liga a cor, "\033[0m" repõe a cor normal.
-# 31 = vermelho   32 = verde     33 = amarelo   34 = azul
-# 35 = magenta    36 = cyan      37 = branco
 COLOR_RESET = "\033[0m"
 COLORS: dict[str, str] = {
-    "1": "31",  # vermelho
-    "2": "32",  # verde
-    "3": "34",  # azul
-    "4": "33",  # amarelo
-    "5": "36",  # cyan
-    "6": "37",  # branco
+    "1": "31",
+    "2": "32",
+    "3": "34",
+    "4": "33",
+    "5": "36",
+    "6": "37",
 }
 
 
@@ -298,6 +294,7 @@ class MazeGenerator:
 
         Each attempt picks a random cell and neighbour, removes the wall
         between them, and re-adds it if doing so creates a 2x2 open block.
+        Cells belonging to the "42" pattern are never modified.
 
         Args:
             attempts: Number of random wall-removal attempts to try.
@@ -305,8 +302,12 @@ class MazeGenerator:
         for i in range(attempts):
             row = random.choice(self.grid)
             cell = random.choice(row)
+            if (cell.x, cell.y) in self.pattern_42:
+                continue
             neighbors = self.get_neighbors(cell)
             neighbor = random.choice(neighbors)
+            if (neighbor.x, neighbor.y) in self.pattern_42:
+                continue
             is_open = False
             if neighbor.y < cell.y:
                 is_open = not cell.wall_north
@@ -484,15 +485,25 @@ class MazeGenerator:
                          exit: tuple[int, int]) -> None:
         """Carve the visually closed "42" pattern into the maze.
 
-        Fully closes a set of cells in the shape of "42" at the top-left
-        corner. If this would block the entry, exit, or disconnect the
-        maze, the pattern is reverted.
+        Fully closes a set of cells in the shape of "42" and marks them
+        as visited so the generator builds the maze around them without
+        ever connecting to them, guaranteeing the pattern never blocks
+        the entry-exit path.
+
+        The pattern is always centered on the grid.
 
         Args:
             entry: (x, y) coordinates of the maze entry.
             exit: (x, y) coordinates of the maze exit.
         """
-        pattern: list[tuple[int, int]] = [
+        if self.width < 10 or self.height < 5:
+            print("The maze needs to be 10x5 at least to apply the 42 pattern")
+            return
+
+        offset_x = (self.width - 10) // 2
+        offset_y = (self.height - 5) // 2
+
+        base_pattern: list[tuple[int, int]] = [
             (0, 0), (0, 1), (0, 2),
             (1, 2), (2, 2), (3, 2), (4, 2),
             (4, 0), (4, 1), (4, 2), (4, 3), (4, 4),
@@ -502,39 +513,19 @@ class MazeGenerator:
             (6, 3),
             (6, 4), (7, 4), (8, 4), (9, 4)
         ]
+        pattern = [(x + offset_x, y + offset_y)
+                   for x, y in base_pattern]
+
         if entry in pattern or exit in pattern:
             print(
                 "Cannot apply 42 pattern: it would block "
                 "the entry or exit."
             )
             return
-        if self.width < 10 or self.height < 5:
-            print("The maze needs to be 10x5 atleast to aplly the 42 pattern")
-            return
-
-        entry_x, entry_y = entry
-        entry_cell = self.grid[entry_y][entry_x]
-        exit_x, exit_y = exit
-        exit_cell = self.grid[exit_y][exit_x]
-
-        affected: set[tuple[int, int]] = set()
-        for col, row in pattern:
-            affected.add((col, row))
-            if col + 1 < self.width:
-                affected.add((col + 1, row))
-            if row + 1 < self.height:
-                affected.add((col, row + 1))
-
-        snapshot: dict[tuple[int, int], tuple[bool, bool, bool, bool]] = {}
-        for (c, r) in affected:
-            cell = self.grid[r][c]
-            snapshot[(c, r)] = (
-                cell.wall_north, cell.wall_south,
-                cell.wall_east, cell.wall_west,
-            )
 
         for col, row in pattern:
             cell = self.grid[row][col]
+            cell.visited = True
             if col + 1 < self.width:
                 self.grid[row][col + 1].wall_west = True
             cell.wall_north = True
@@ -543,19 +534,6 @@ class MazeGenerator:
             cell.wall_west = True
             cell.wall_east = True
             cell.wall_south = True
-
-        if not self.is_connected(entry_cell, exit_cell):
-            for (c, r), (n, s, e, w) in snapshot.items():
-                cell = self.grid[r][c]
-                cell.wall_north = n
-                cell.wall_south = s
-                cell.wall_east = e
-                cell.wall_west = w
-            print(
-                "Cannot apply 42 pattern: it would block "
-                "the entry or exit."
-            )
-            return
 
         self.pattern_42 = pattern
 
@@ -571,9 +549,6 @@ class MazeGenerator:
             path: Filesystem path for the output file.
             entry: (x, y) coordinates of the maze entry.
             exit: (x, y) coordinates of the maze exit.
-
-        Raises:
-            ValueError: If entry and exit are not connected.
         """
         with open(path, "w") as f:
             for row in self.grid:
@@ -588,23 +563,6 @@ class MazeGenerator:
             exit_cell = self.grid[exit_y][exit_x]
             f.write(f"{entry[0]},{entry[1]}\n")
             f.write(f"{exit[0]},{exit[1]}\n")
-            try:
-                caminho = self.bfs(entry_cell, exit_cell)
-            except KeyError:
-                raise ValueError(
-                    "Entry and exit are not connected "
-                    "(likely due to the 42 pattern blocking the path)."
-                )
+            caminho = self.bfs(entry_cell, exit_cell)
             directions = self.path_to_directions(caminho)
             f.write(directions + "\n")
-
-# if __name__ == "__main__":
-#     m = MazeGenerator(20, 20, seed=42)
-#     entry = (0, 19)
-#     exit_ = (19, 19)
-#     m.generate(entry[0], entry[1])
-#     m.apply_42_pattern(entry, exit_)
-#     entry_cell = m.grid[entry[1]][entry[0]]
-#     exit_cell = m.grid[exit_[1]][exit_[0]]
-#     caminho = m.bfs(entry_cell, exit_cell)
-#     m.print_maze(entry, exit_, caminho, cor="34", cor_42="35")

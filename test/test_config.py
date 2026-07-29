@@ -59,3 +59,16 @@ PERFECT=True
 def test_nonexistent_file_raises() -> None:
     with pytest.raises(ConfigError):
         load_config("this_file_does_not_exist.txt")
+
+
+def test_entry_not_on_border_raises(tmp_path: object) -> None:
+    path = write_config(tmp_path, """
+WIDTH=10
+HEIGHT=10
+ENTRY=5,5
+EXIT=9,9
+OUTPUT_FILE=maze.txt
+PERFECT=True
+""")
+    with pytest.raises(ConfigError, match="border"):
+        load_config(path)
