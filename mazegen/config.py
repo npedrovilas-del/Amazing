@@ -1,7 +1,7 @@
 from __future__ import annotations
 import sys
 from typing import Any
-
+import random
 
 class ConfigError(Exception):
     """Raised when the configuration file is invalid or missing."""
@@ -58,7 +58,7 @@ def load_config(path: str) -> dict[str, Any]:
     except (IndexError, ValueError) as e:
         raise ConfigError(f"Error: {e}")
     if "SEED" not in config_dict:
-        config_dict["SEED"] = 42
+        config_dict["SEED"] = random.randint(1, 1000)
     if config_dict["ENTRY"] == config_dict["EXIT"]:
         raise ConfigError("Entry and exit should be in diferent places")
     if config_dict["WIDTH"] <= 0:

@@ -496,7 +496,7 @@ class MazeGenerator:
             entry: (x, y) coordinates of the maze entry.
             exit: (x, y) coordinates of the maze exit.
         """
-        if self.width < 10 or self.height < 5:
+        if self.width < 13 or self.height < 8:
             print("The maze needs to be 10x5 at least to apply the 42 pattern")
             return
 
