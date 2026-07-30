@@ -1,5 +1,5 @@
 import sys
-from config import load_config, ConfigError
+from mazegen.config import load_config, ConfigError
 from mazegen.generator import MazeGenerator, COLORS
 
 if __name__ == "__main__":
@@ -11,7 +11,9 @@ if __name__ == "__main__":
     except ConfigError as e:
         print(f"{e}")
         sys.exit(1)
-    print(config)
+    except ValueError as e:
+        print(f"{sys.argv[1]} {e}")
+        sys.exit(1)
     try:
         m2 = MazeGenerator(config["WIDTH"], config["HEIGHT"],
                            seed=config["SEED"])
@@ -37,10 +39,12 @@ if __name__ == "__main__":
         print("1. Re-generate maze")
         print("2. Show/Hide path")
         print("3. Change colors")
-        print("4. Quit")
-        escolha = input("Choice? (1-4): ")
+        print("4. Launch MLX display")
+        print("5. Quit")
+        escolha = input("Choice? (1-5): ")
         if escolha == "1":
             try:
+                config = load_config(sys.argv[1])
                 m2 = MazeGenerator(config["WIDTH"], config["HEIGHT"],
                                    seed=config["SEED"])
                 entry_x, entry_y = config["ENTRY"]
@@ -72,4 +76,10 @@ if __name__ == "__main__":
                     mostrar_caminho else [], cor_atual)
             m2.print_maze(*args)
         elif escolha == "4":
+            import subprocess
+            try:
+                subprocess.Popen(["./mlx_display", config["OUTPUT_FILE"]])
+            except FileNotFoundError:
+                print("mlx_display not found. Compile: make mlx_display")
+        elif escolha == "5":
             break
