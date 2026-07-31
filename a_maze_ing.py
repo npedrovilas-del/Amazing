@@ -64,6 +64,8 @@ if __name__ == "__main__":
                 print(f"Error: {e}")
         elif escolha == "2":
             mostrar_caminho = not mostrar_caminho
+            with open(config["OUTPUT_FILE"] + ".show", "w") as _f:
+                _f.write("1\n" if mostrar_caminho else "0\n")
             if mostrar_caminho:
                 m2.print_maze(config["ENTRY"], config["EXIT"], caminho)
             else:
@@ -71,15 +73,22 @@ if __name__ == "__main__":
         elif escolha == "3":
             print("1: Red  2: Green  3: Blue  4: Yellow  5: Cyan  6: White")
             cor_escolha = input("Escolhe uma cor: ")
+            with open(config["OUTPUT_FILE"] + ".color", "w") as _f:
+                _f.write(cor_escolha + "\n")
             cor_atual = COLORS.get(cor_escolha, "37")
             args = (config["ENTRY"], config["EXIT"], caminho if
                     mostrar_caminho else [], cor_atual)
             m2.print_maze(*args)
         elif escolha == "4":
+            import os
             import subprocess
-            try:
-                subprocess.Popen(["./mlx_display", config["OUTPUT_FILE"]])
-            except FileNotFoundError:
-                print("mlx_display not found. Compile: make mlx_display")
+            if not os.path.exists("./mlx_display"):
+                print("mlx_display not found. Compiling: make mlx")
+                result = subprocess.run(["make", "mlx"])
+                if result.returncode != 0:
+                    print("Compilation failed. Check minilibx_linux and "
+                          "X11 libraries.")
+                    continue
+            subprocess.Popen(["./mlx_display", config["OUTPUT_FILE"]])
         elif escolha == "5":
             break

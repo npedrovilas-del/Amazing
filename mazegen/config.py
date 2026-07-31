@@ -3,6 +3,7 @@ import sys
 from typing import Any
 import random
 
+
 class ConfigError(Exception):
     """Raised when the configuration file is invalid or missing."""
 

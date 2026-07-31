@@ -11,3 +11,6 @@ dist/
 maze.txt
 teste.txt
 *.out.txt
+# Runtime state files
+*.show
+*.color
