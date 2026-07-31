@@ -1,7 +1,0 @@
-WIDTH=10
-HEIGHT=5
-ENTRY=0,0
-EXIT=9,4
-OUTPUT_FILE=/invalid_dir/maze_out.txt
-PERFECT=True
-SEED=42

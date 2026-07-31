@@ -33,6 +33,7 @@ make debug        # runs the program under pdb
 make clean        # removes __pycache__ and .mypy_cache
 make lint         # runs flake8 and mypy
 make lint-strict  # runs flake8 and mypy --strict
+make mlx          # compiles the MLX display (mlx_display)
 ```
 
 You can also run it manually:
@@ -53,6 +54,18 @@ make build
 This generates `mazegen-1.0.0-py3-none-any.whl` (and a `.tar.gz`) at the
 root of the repository, ready to be installed with `pip install
 mazegen-1.0.0-py3-none-any.whl` in any other project.
+
+### MLX display
+
+`make mlx` compiles `mlx_display.c` into `mlx_display` using the bundled
+`minilibx_linux` (requires the X11 development libraries on the system).
+The MLX display is not a Python dependency and is not installed via pip.
+
+From the menu, option `4. Launch MLX display` runs it with the generated
+maze file. The window shows the maze with the entry/exit highlighted and
+the shortest path overlaid; it hot-reloads when the maze file changes and
+reads `maze.txt.show` / `maze.txt.color` to toggle the path and change
+the wall color.
 
 ## Configuration file format
 
@@ -187,7 +200,7 @@ remove tedious work. This applied across every part of the project:
 config parsing, the maze generator classes, the recursive backtracker,
 the 2x2-area validation, the "42" pattern, loop generation, BFS, the
 output file format, the ASCII visualisation with colors, the Makefile,
-and the packaging setup.
+the MLX display, and the packaging setup.
 
 ## Team and project management
 

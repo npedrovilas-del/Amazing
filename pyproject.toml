@@ -12,6 +12,14 @@ authors = [
     {name = "pneto-vi"},
     {name = "nfardim"},
 ]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "flake8",
+    "mypy",
+    "build",
+]
 
 [tool.setuptools.packages.find]
 include = ["mazegen*"]

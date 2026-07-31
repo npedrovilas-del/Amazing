@@ -1,7 +1,0 @@
-WIDTH=10
-HEIGHT=5
-ENTRY=abc,def
-EXIT=9,4
-OUTPUT_FILE=maze_out.txt
-PERFECT=True
-SEED=42

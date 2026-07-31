@@ -1,4 +1,0 @@
-WIDTH=10
-ENTRY=0,0
-EXIT=9,4
-OUTPUT_FILE=maze_out.txt
