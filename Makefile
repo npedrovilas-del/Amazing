@@ -17,7 +17,10 @@ run:
 install:
 	$(PIP) install -e '.[dev]'
 
-build:
+install-deps:
+	sudo apt-get install -y gcc make libx11-dev libxext-dev libbsd-dev libz-dev
+
+build: install-deps
 	$(PY) -m build
 
 lint:
@@ -28,7 +31,10 @@ lint-strict:
 	$(PY) -m flake8 $(PY_SRC) mazegen
 	$(PY) -m mypy --strict $(PY_SRC) mazegen
 
-mlx: $(SRC)
+minilibx_linux/libmlx.a:
+	$(MAKE) -C minilibx_linux all
+
+mlx: $(SRC) minilibx_linux/libmlx.a
 	$(CC) $(CFLAGS) $(SRC) $(LDFLAGS) -o $(NAME)
 
 $(NAME): mlx
@@ -41,4 +47,4 @@ fclean: clean
 
 re: clean all
 
-.PHONY: all run install debug build lint lint-strict mlx clean fclean re
+.PHONY: all run install debug build install-deps lint lint-strict mlx clean fclean re
