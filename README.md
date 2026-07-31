@@ -2,6 +2,9 @@
 
 # A-Maze-ing
 
+## Warning
+The dependencies in the Makefile are configured for Ubuntu (sudo apt). If you are using a different operating system, please update the installation commands accordingly before running the setup.
+
 ## Description
 
 A-Maze-ing is a Python maze generator. Given a simple configuration file,
